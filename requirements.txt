@@ -54,3 +54,4 @@ Python-jose==3.0.1
 git+https://github.com/DefectDojo/defectDojo-engagement-survey@master#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
+djangosaml2==0.17.2
