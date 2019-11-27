@@ -78,9 +78,9 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
-    DD_SAML_ENABLED=(bool, False),
-    DD_DOJO_URL=(str, 'http://localhost'),
-    DD_SSO_URL=(str, 'https://sso.service.com'),
+    DD_SAML_ENABLED=(bool, True),
+    DD_DOJO_URL=(str, 'http://localhost:8080'),
+    DD_SSO_URL=(str, 'https://localhost:9443/samlsso'),
 )
 
 
@@ -259,6 +259,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'djangosaml2.backends.Saml2Backend',
 )
 
 SOCIAL_AUTH_PIPELINE = (
@@ -306,6 +307,7 @@ LOGIN_EXEMPT_URLS = (
     r'complete/okta-oauth2/',
     r'empty_survey/([\d]+)/answer'
     r'complete/azuread-tenant-oauth2/',
+    r'^%ssaml2/' % URL_PREFIX,
 )
 
 # ------------------------------------------------------------------------------
@@ -318,18 +320,18 @@ if env('DD_SAML_ENABLED'):
     from os import path
     DOJO_URL = env('DD_DOJO_URL')
     SSO_URL = env('DD_SSO_URL')
-    INSTALLED_APPS += ('djangosaml2',)
-    AUTHENTICATION_BACKENDS += ('djangosaml2.backends.Saml2Backend',)
-    LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
+    # INSTALLED_APPS += ('djangosaml2',)
+    # AUTHENTICATION_BACKENDS += ('djangosaml2.backends.Saml2Backend',)
+    # LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
     #SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = True
     SAML_ATTRIBUTE_MAPPING = {
-        'Email': ('email', ),
-        'Firstname': ('first_name', ),
-        'Lastname': ('last_name', ),
+        'emailaddress': ('email', ),
+        'firstname': ('first_name', ),
+        'lastname': ('last_name', ),
     }
     BASEDIR = path.dirname(path.abspath(__file__))
     SAML_CONFIG = {
@@ -383,7 +385,7 @@ if env('DD_SAML_ENABLED'):
                      # the keys of this dictionary are entity ids
                     'endpoints': {
                         'single_sign_on_service': {
-                            saml2.BINDING_HTTP_REDIRECT: '%s/saml/idp/profile/redirectorpost/sso' % SSO_URL,
+                            saml2.BINDING_HTTP_REDIRECT: 'https://localhost:9443/samlsso',
                         },
                         'single_logout_service': {
                             saml2.BINDING_HTTP_REDIRECT: '%s/saml/idp/profile/post/sls' % SSO_URL,
@@ -395,15 +397,11 @@ if env('DD_SAML_ENABLED'):
 
          # where the remote metadata is stored
         'metadata': {
-            'remote':[
-                {
-                    "url":'%s/public/share/idp_metadata.xml' % SSO_URL
-                }
-            ],
+            'local': [path.join(BASEDIR, 'metadata.xml')],
         },
 
          # set to 1 to output debugging information
-        'debug': 0,
+        'debug': 1,
 
          # Signing
         #'key_file': path.join(BASEDIR, 'mycert.key'), # private part
@@ -585,6 +583,7 @@ INSTALLED_APPS = (
     # 'axes'
     'django_celery_results',
     'social_django',
+    'djangosaml2',
 )
 
 # ------------------------------------------------------------------------------
