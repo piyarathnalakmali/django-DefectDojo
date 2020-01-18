@@ -604,6 +604,13 @@ DEDUPE_ALGO_HASH_CODE = 'hash_code'
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+# wso2 custom deduplication algorithm
+DEDUPE_ALGO_WSO2_CUSTOM = 'deduplication_wso2_custom'
+# Attributes used to identify duplicate findings
+DEDUPLICATION_ATTRIBUTES = {
+    'static': ['title', 'cwe', 'cve', 'line', 'offset'],
+    'dynamic': ['title', 'cwe', 'cve', 'endpoints']
+}
 
 # Choice of deduplication algorithm per parser
 # Key = the scan_type from factory.py (= the test_type)
@@ -617,7 +624,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
-    'Qualys Scan': DEDUPE_ALGO_HASH_CODE
+    'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
+    'Veracode Scan': DEDUPE_ALGO_WSO2_CUSTOM
 }
 
 # ------------------------------------------------------------------------------
