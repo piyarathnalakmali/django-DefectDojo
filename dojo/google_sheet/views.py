@@ -361,6 +361,8 @@ def sync_findings(request, tid, spreadsheetId):
                                 setattr(finding_db, column_name, True)
                             elif finding_sheet[index_of_column] == 'FALSE':
                                 setattr(finding_db, column_name, False)
+                            elif finding_sheet[index_of_column] == '':
+                                setattr(finding_db, column_name, None)
                             else:
                                 setattr(finding_db, column_name, finding_sheet[index_of_column])
                     elif column_name[:6] == '[note]' and column_name[-3:] == '_id':                      # Updating notes
